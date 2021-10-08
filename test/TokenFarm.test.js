@@ -71,6 +71,14 @@ contract('TokenFarm', ([owner, investor]) => {
 
             result = await tokenFarm.isStaking(investor);
             assert.equal(true, result, 'Investor is in isStaking mapping');
+
+            // Issue Tokens
+            await tokenFarm.issueTokens({from: owner});
+            result = await dappToken.balanceOf(investor);
+            assert.equal(tokens('100'), result.toString(), "Issued tokens matches staked tokens.");
+
+            // Ensure owner is the only one that can issue tokens
+            await tokenFarm.issueTokens({from: investor}).should.be.rejected;
         })
     })
 })
