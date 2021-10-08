@@ -46,7 +46,7 @@ contract('TokenFarm', ([owner, investor]) => {
 
         it('contract has tokens', async() => {
             let balance = await dappToken.balanceOf(tokenFarm.address);
-            assert.equal(balance.toString(), tokens('1000000'))
+            assert.equal(balance.toString(), tokens('1000000'));
         })
     })
 
