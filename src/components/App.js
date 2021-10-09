@@ -2,9 +2,19 @@ import React, { useState, useEffect } from 'react'
 import Web3 from 'web3'
 import Navbar from './Navbar'
 import './App.css'
+import DaiToken from '../abis/DaiToken.json'
+import DappToken from '../abis/DappToken.json'
+import TokenFarm from '../abis/TokenFarm.json'
 
 const App = () => {
   const [account, setAccount] = useState('0x0');
+  const [daiToken, setDaiToken] = useState({});
+  const [dappToken, setDappToken] = useState({});
+  const [tokenFarm, setTokenFarm] = useState({});
+  const [daiTokenBalance, setDaiTokenBalance] = useState('0');
+  const [dappTokenBalance, setDappTokenBalance] = useState('0');
+  const [stakingBalanace, setStakingBalance] = useState('0');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadBlockchain = async () => {
@@ -12,7 +22,7 @@ const App = () => {
       await loadBlockchainData();
     }
     loadBlockchain();
-  });
+  }, []);
 
   const loadWeb3 = async () => {
     if(window.ethereum) {
@@ -31,7 +41,48 @@ const App = () => {
     const web3 = window.web3;
 
     const accounts = await web3.eth.getAccounts();
+    console.log(accounts[0]);
     setAccount(accounts[0]);
+
+    const networkId = await web3.eth.net.getId();
+    
+    const daiTokenData = DaiToken.networks[networkId];
+    if(daiTokenData) {
+      const daiToken = new web3.eth.Contract(DaiToken.abi, daiTokenData.address);
+      setDaiToken(daiToken);
+
+      let daiTokenBalance = await daiToken.methods.balanceOf(accounts[0]).call();
+      setDaiTokenBalance(daiTokenBalance.toString());
+
+    } else {
+      window.alert("DaiToken contract has not been deployed to the detected network.");
+    }
+
+    const dappTokenData = DappToken.networks[networkId];
+    if(dappTokenData) {
+      const dappToken = new web3.eth.Contract(DappToken.abi, dappTokenData.address);
+      setDappToken(dappToken);
+
+      let dappTokenBalance = await dappToken.methods.balanceOf(accounts[0]).call();
+      setDappTokenBalance(dappTokenBalance.toString());
+      
+    } else {
+      window.alert("DappToken contract has not been deployed to the detected network.");
+    }
+
+    const tokenFarmData = TokenFarm.networks[networkId];
+    if(tokenFarmData) {
+      const tokenFarm = new web3.eth.Contract(TokenFarm.abi, tokenFarmData.address);
+      setTokenFarm(tokenFarm);
+
+      let stakingBalance = await tokenFarm.methods.stakingBalance(accounts[0]).call();
+      setStakingBalance(stakingBalance.toString());
+      
+    } else {
+      window.alert("TokenFarm contract has not been deployed to the detected network.");
+    }
+
+    setLoading(false);
   }
 
   return (
