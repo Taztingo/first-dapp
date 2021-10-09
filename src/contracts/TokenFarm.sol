@@ -40,7 +40,13 @@ contract TokenFarm {
         isStaking[msg.sender] = true;
     }
 
-    function unstakeTokens(uint _amount) public {
+    function unstakeTokens() public {
+        uint balance = stakingBalance[msg.sender];
+        require(balance > 0, "staking balance cannot be 0");
+
+        daiToken.transfer(msg.sender, balance);
+        stakingBalance[msg.sender] = 0;
+        isStaking[msg.sender] = false;
 
     }
 
